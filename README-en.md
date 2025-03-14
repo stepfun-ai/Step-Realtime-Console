@@ -156,8 +156,9 @@ This project uses the Stepfun Realtime Voice API, and the main functions include
 ## Precautions
 
 1.  **Bun Runtime**: This project uses Bun's native WebSocket, so it is not compatible with the Node.js environment and must be run with Bun.
-2.  **API Key**: You need to configure a valid API key before use.
-3.  **Audio Device**: Please ensure that microphone permissions have been granted to the browser when using it.
+2.  **Bun Version**: Ensure your Bun version is above 1.2, if not, please upgrade via `bun upgrade`
+3.  **API Key**: You need to configure a valid API key before use.
+4.  **Audio Device**: Please ensure that microphone permissions have been granted to the browser when using it.
 
 ## Third-Party Library Copyright Notice
 
