@@ -288,10 +288,13 @@
    */
   async function startRecording() {
     isRecording = true;
-    const trackSampleOffset = wavStreamPlayer.interrupt();
+
+    // @ts-ignore - interrupt() 实际返回 Promise，但类型定义不正确
+    const trackSampleOffset = await wavStreamPlayer.interrupt();
     if (trackSampleOffset?.trackId) {
       const { trackId, offset } = trackSampleOffset;
       client?.cancelResponse(trackId, offset);
+      isAISpeaking = false; // 立即更新 AI 说话状态
     }
     await wavRecorder.record(data => client?.appendInputAudio(data.mono));
   }
