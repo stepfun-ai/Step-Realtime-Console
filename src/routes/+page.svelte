@@ -145,7 +145,7 @@
           connectionError = realtimeEvent.event.message || '连接发生错误';
 
           // 确保断开连接
-          if (isConnected) {
+          if (isConnected && realtimeEvent.event.error === 'connection_closed') {
             disconnectConversation();
           }
         }

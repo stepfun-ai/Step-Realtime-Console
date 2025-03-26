@@ -182,6 +182,7 @@ async function startWebSocketServer() {
             // 如果连接异常关闭（非正常关闭），发送错误消息
             if (event.code !== 1000) {
               try {
+                console.log('最终服务器连接异常关闭');
                 // 构建错误消息
                 let errorMessage = {
                   type: 'error',
