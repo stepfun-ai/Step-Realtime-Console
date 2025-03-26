@@ -142,10 +142,10 @@
         // 检查是否是错误消息
         if (realtimeEvent.event.type === 'error') {
           console.error('Received error event:', realtimeEvent);
-          connectionError = realtimeEvent.event.message || '连接发生错误';
 
           // 确保断开连接
           if (isConnected && realtimeEvent.event.error === 'connection_closed') {
+            connectionError = realtimeEvent.event.message || '连接发生错误';
             disconnectConversation();
           }
         }
