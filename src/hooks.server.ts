@@ -187,7 +187,7 @@ async function startWebSocketServer() {
                 let errorMessage = {
                   type: 'error',
                   error: 'connection_closed',
-                  message: '服务器连接已关闭，请重试'
+                  message: '无法连接到服务器，请检查服务器地址或 API Key'
                 };
 
                 // 只有在 WebSocket 仍然开启状态时才发送

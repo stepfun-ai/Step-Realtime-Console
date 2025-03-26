@@ -154,7 +154,7 @@
 
     // 如果有错误，在控制台打印，并断开连接
     client?.on('error', (event: RealtimeEvent) => {
-      console.error(event);
+      console.error(' 错误事件：', event);
 
       // 检查是否是服务器发送的错误消息
       if (event && event.event && event.event.type === 'error') {
