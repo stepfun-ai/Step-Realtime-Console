@@ -8,6 +8,13 @@
   import { onDestroy, onMount, tick } from 'svelte';
   import WaveSurfer from 'wavesurfer.js';
 
+  // 添加自定义音色接口返回类型
+  interface CustomVoice {
+    id: string;
+    file_id: string;
+    created_at: number;
+  }
+
   // 定义音频播放器类型
   interface AudioPlayer {
     wavesurfer: any;
@@ -36,6 +43,7 @@
   let connectionError = $state(''); // 用于存储连接错误信息
 
   let selectedVoice = $state(voices[0]); // 选择的音色
+  let allVoices = $state(voices); // 所有音色(系统音色+自定义音色)
   let instructions = $state(defaultInstruction); // 默认人设
   let newInstruction = $state((() => instructions)()); // 这是一个副本，用于在模态框中编辑，当点击确定时，将其赋值给 instruction，否则不会改变 instruction
   let temperature = $state(0.8); // 温度
@@ -45,6 +53,42 @@
 
   let instructionsModal: HTMLDialogElement; // 修改人设的模态框
   let settingsModal: HTMLDialogElement; // 设置的模态框
+
+  // 获取自定义音色
+  async function fetchCustomVoices() {
+    if (!browser || !apiKey) return;
+    try {
+      const response = await fetch('https://api.stepfun.com/v1/audio/voices?limit=100', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`
+        }
+      });
+
+      if (!response.ok) {
+        console.log('获取自定义音色失败，状态码:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.object === 'list' && data.data) {
+        // 将自定义音色添加到系统音色后面
+        allVoices = [
+          ...voices,
+          ...data.data.map((voice: CustomVoice) => ({
+            name: `自定义音色-${voice.id}`,
+            value: voice.id
+          }))
+        ];
+
+        // 如果当前选择的音色不存在于新列表中，重置为第一个音色
+        if (!allVoices.some(v => v.value === selectedVoice.value)) {
+          selectedVoice = allVoices[0];
+        }
+      }
+    } catch (error) {
+      console.log('获取自定义音色出错:', error);
+    }
+  }
 
   // 从 localStorage 加载保存的设置
   onMount(() => {
@@ -56,15 +100,19 @@
       if (savedWsUrl) wsUrl = savedWsUrl;
       if (savedModelName) modelName = savedModelName;
       if (savedApiKey) apiKey = savedApiKey;
+
+      // 页面加载时获取自定义音色
+      fetchCustomVoices();
     }
   });
 
-  // 监听变量变化并保存到 localStorage
+  // 监听apiKey变化并重新获取自定义音色
   $effect(() => {
     if (browser) {
       localStorage.setItem('wsUrl', wsUrl);
       localStorage.setItem('modelName', modelName);
       localStorage.setItem('apiKey', apiKey);
+      fetchCustomVoices();
     }
   });
 
@@ -488,7 +536,7 @@
         <label class="select rounded-box mr-2 w-60">
           <span class="label">切换音色</span>
           <select bind:value={selectedVoice} onchange={changeVoice}>
-            {#each voices as voice}
+            {#each allVoices as voice}
               <option value={voice}>{voice.name}</option>
             {/each}
           </select>
