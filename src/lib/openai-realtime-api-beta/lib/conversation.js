@@ -44,6 +44,8 @@ export class RealtimeConversation {
         for (const content of textContent) {
           newItem.formatted.text += content.text;
         }
+      } else {
+        newItem.content = [];
       }
       // If we have a transcript item, can pre-populate transcript
       if (this.queuedTranscriptItems[newItem.id]) {
