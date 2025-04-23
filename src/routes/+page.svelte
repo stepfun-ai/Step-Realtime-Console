@@ -281,6 +281,16 @@
         // 连接成功，清除超时
         clearTimeout(connectionTimeout);
 
+        // 连接成功后，立即用当前选择的音色更新服务器会话
+        if (client && selectedVoice?.value) {
+          try {
+            client.updateSession({ voice: selectedVoice.value });
+            console.log('Session voice updated on reconnect:', selectedVoice.value);
+          } catch (updateError) {
+            console.error('Failed to update session voice on reconnect:', updateError);
+          }
+        }
+
         client?.sendUserMessageContent([
           {
             type: `input_text`,
