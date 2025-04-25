@@ -3,7 +3,7 @@
 @plugin "daisyui/theme" {
   name: 'light';
   default: true;
-  --color-base-100: oklch(1.0 0.0 0); /* 纯白色 */
+  --color-base-100: oklch(1 0 0); /* 纯白色 */
   --color-base-200: oklch(0.97 0.005 0); /* 非常淡的灰色 */
   --color-base-300: oklch(0.94 0.01 0); /* 浅灰色 */
   --color-base-content: oklch(0.2 0.02 0); /* 深灰近黑色文本 */

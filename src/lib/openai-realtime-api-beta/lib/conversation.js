@@ -137,12 +137,12 @@ export class RealtimeConversation {
         const startIndex = Math.floor(
           ((speech.audio_start_ms - new Date().getTime()) *
             this.defaultFrequency) /
-          1000,
+            1000,
         );
         const endIndex = Math.floor(
           ((speech.audio_end_ms - new Date().getTime()) *
             this.defaultFrequency) /
-          1000,
+            1000,
         );
         speech.audio = inputAudioBuffer.slice(startIndex, endIndex);
       }
@@ -330,15 +330,15 @@ export class RealtimeConversation {
   }
 
   /**
-     * 清理 items 数组，避免占用过多内存。
-     * @param {number} maxItems 允许保留的最大 item 数量（最小值为 30）。
-     */
+   * 清理 items 数组，避免占用过多内存。
+   * @param {number} maxItems 允许保留的最大 item 数量（最小值为 30）。
+   */
   cleanupItems(maxItems) {
     const minMaxItems = 30;
     if (maxItems < minMaxItems) {
       maxItems = minMaxItems;
     }
-    
+
     // 如果 items 的数量小于 maxItems，则不需要清理，直接返回
     if (this.items.length <= maxItems) {
       return;

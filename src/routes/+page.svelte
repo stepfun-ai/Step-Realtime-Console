@@ -4,7 +4,7 @@
   import { RealtimeClient } from '$lib/openai-realtime-api-beta';
   import type { AudioFormatType, ItemType } from '$lib/openai-realtime-api-beta/lib/client.js';
   import { WavRecorder, WavStreamPlayer } from '$lib/wavtools/index.js';
-  import { ArrowDown, ArrowUp, BadgeInfo, Mic, Pause, Play, Settings } from 'lucide-svelte';
+  import { ArrowDown, ArrowUp, BadgeInfo, Mic, Pause, Play, Settings, X } from 'lucide-svelte';
   import { onDestroy, onMount, tick } from 'svelte';
   import WaveSurfer from 'wavesurfer.js';
 
@@ -35,6 +35,8 @@
   let items: Array<ItemType> = $state([]); // 对话
   let realtimeEvents: Array<RealtimeEvent> = $state([]); // 所有事件日志
   let expandedEvents: Record<string, boolean> = $state({}); // 展开的事件日志的 id
+  let filterText = $state(''); // 过滤文本
+  let filterSource = $state('all'); // 过滤来源：all, server, client
   let audioPlayers: Record<string, AudioPlayer> = $state({}); // 存储对话音频的播放器
   let isConnected = $state(false); // 是否已连接
   let isRecording = $state(false); // 是否正在录制
@@ -142,7 +144,7 @@
   async function initClient() {
     await tick();
     // WebSocket 中转服务 url
-    let wsProxyUrl = 'ws://localhost:8080';
+    let wsProxyUrl = 'ws://127.0.0.1:8080';
 
     // 构建查询参数
     const params = new URLSearchParams();
@@ -506,6 +508,28 @@
   function toggleEventDetails(eventId: string) {
     expandedEvents[eventId] = (expandedEvents[eventId] ?? false) ? false : true;
   }
+
+  // 过滤事件日志
+  function filterEvents(events: Array<RealtimeEvent>) {
+    if (!filterText && filterSource === 'all') return events;
+
+    return events.filter(event => {
+      // 根据来源过滤
+      if (filterSource !== 'all' && event.source !== filterSource) return false;
+
+      // 根据文本过滤
+      if (filterText) {
+        const lowerFilterText = filterText.toLowerCase();
+        // 检查事件类型
+        if (event.event.type.toLowerCase().includes(lowerFilterText)) return true;
+        // 检查事件内容（转为字符串后搜索）
+        if (JSON.stringify(event.event).toLowerCase().includes(lowerFilterText)) return true;
+        return false;
+      }
+
+      return true;
+    });
+  }
 </script>
 
 <div class="bg-base-100 flex h-screen flex-col p-4">
@@ -692,7 +716,7 @@
       <div class="flex h-12 items-center justify-between p-2">
         <h2 class="text-xl font-semibold">调试日志</h2>
         <div>
-          {#if Object.keys(expandedEvents).length > 0}
+          {#if realtimeEvents.length > 0}
             <button class="btn btn-sm" onclick={() => (expandedEvents = {})}>全部折叠</button>
           {/if}
           {#if realtimeEvents.length > 0}
@@ -708,11 +732,34 @@
           {/if}
         </div>
       </div>
+      <!-- 过滤控制区域 -->
+      {#if realtimeEvents.length > 0}
+        <div class="border-base-300 flex items-center gap-2 border-b p-2">
+          <select class="select select-sm select-bordered w-32" bind:value={filterSource}>
+            <option value="all">全部来源</option>
+            <option value="server">服务器</option>
+            <option value="client">客户端</option>
+          </select>
+          <div class="relative flex-1">
+            <input type="text" class="input input-sm input-bordered w-full pr-8" placeholder="输入关键词过滤日志" bind:value={filterText} />
+            {#if filterText}
+              <button
+                class="absolute top-1/2 right-2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-slate-300 hover:text-slate-700 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-200"
+                onclick={() => (filterText = '')}
+              >
+                <X size={16} />
+              </button>
+            {/if}
+          </div>
+        </div>
+      {/if}
       <div class="min-h-0 flex-1 overflow-y-auto p-2 text-sm" use:autoScroll>
         {#if realtimeEvents.length === 0}
           <div class="flex h-full items-center justify-center text-center">暂无调试日志</div>
+        {:else if filterEvents(realtimeEvents).length === 0}
+          <div class="flex h-full items-center justify-center text-center">没有匹配的日志</div>
         {:else}
-          {#each realtimeEvents as event, i}
+          {#each filterEvents(realtimeEvents) as event, i (event.time + '-' + i)}
             <div class="border-base-300/40 mb-1 border-b py-1">
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
