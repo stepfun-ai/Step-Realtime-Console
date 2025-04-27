@@ -60,7 +60,11 @@
   async function fetchCustomVoices() {
     if (!browser || !apiKey) return;
     try {
-      const response = await fetch('https://api.stepfun.com/v1/audio/voices?limit=100', {
+      // 从 wsUrl 中提取域名
+      const domain = new URL(wsUrl).origin;
+      // 将 ws:// 或 wss:// 转换为 http:// 或 https://
+      const httpDomain = domain.replace('ws://', 'http://').replace('wss://', 'https://');
+      const response = await fetch(`${httpDomain}/v1/audio/voices?limit=100`, {
         headers: {
           Authorization: `Bearer ${apiKey}`
         }
