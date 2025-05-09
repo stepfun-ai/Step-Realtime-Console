@@ -4,7 +4,7 @@
   import { RealtimeClient } from '$lib/openai-realtime-api-beta';
   import type { AudioFormatType, ItemType } from '$lib/openai-realtime-api-beta/lib/client.js';
   import { WavRecorder, WavStreamPlayer } from '$lib/wavtools/index.js';
-  import { ArrowDown, ArrowUp, BadgeInfo, Mic, Pause, Play, Settings, X } from 'lucide-svelte';
+  import { ArrowDown, ArrowUp, BadgeInfo, Download, Mic, Pause, Play, Settings, X } from 'lucide-svelte';
   import { onDestroy, onMount, tick } from 'svelte';
   import WaveSurfer from 'wavesurfer.js';
 
@@ -534,6 +534,21 @@
       return true;
     });
   }
+  
+  /**
+   * 下载音频文件
+   * @param url 音频文件URL
+   * @param filename 保存的文件名
+   */
+  function downloadAudio(url: string, filename: string) {
+    // 创建一个临时的a标签用于下载
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 </script>
 
 <div class="bg-base-100 flex h-screen flex-col p-4">
@@ -658,7 +673,7 @@
                   <div class="flex items-center gap-2">
                     <span>{item.role === 'user' ? 'You' : 'AI'}</span>
                     {#if item.formatted?.file}
-                      <div class="bg-base-300/80 flex h-6 w-48 items-center gap-2 overflow-hidden rounded-lg px-2 transition-all duration-200 hover:shadow">
+                      <div class="bg-base-300/80 flex h-6 w-48 items-center gap-2 overflow-hidden rounded-lg px-2 transition-all duration-200 hover:shadow group">
                         <button
                           class="transition-colors duration-200 hover:scale-110 hover:cursor-pointer"
                           onclick={() => togglePlay(item.id)}
@@ -674,6 +689,13 @@
                           {/if}
                         </button>
                         <div id="waveform-{item.id}" class="flex-1 overflow-hidden rounded-lg {audioPlayers[item.id]?.hasError ? 'opacity-50' : ''}" use:initWaveSurfer={{ id: item.id, url: item.formatted.file.url }}></div>
+                        <button
+                          class="transition-colors duration-200 hover:scale-110 hover:cursor-pointer opacity-0 group-hover:opacity-100"
+                          onclick={() => downloadAudio(item.formatted.file.url, `audio-${item.id}.wav`)}
+                          title="下载音频"
+                        >
+                          <Download size={14} />
+                        </button>
                       </div>
                     {/if}
                   </div>
