@@ -182,9 +182,9 @@
 
     // 把收到和发出的消息都记录下来
     client?.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
-      // 限制记录的日志数量，避免占用太多内存，超过 300 条的时候，就移除最前面的 100 条
-      if (realtimeEvents.length > 300) {
-        realtimeEvents.splice(0, 100);
+      // 限制记录的日志数量，避免占用太多内存，超过 3000 条的时候，就移除最前面的 1000 条
+      if (realtimeEvents.length > 3000) {
+        realtimeEvents.splice(0, 1000);
       }
       realtimeEvents.push(realtimeEvent);
 
