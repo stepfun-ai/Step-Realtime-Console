@@ -73,7 +73,16 @@ import { RealtimeUtils } from './utils.js';
  * @typedef {Object} AudioContentType
  * @property {"audio"} type
  * @property {string} [audio] base64-encoded audio data
- * @property {string|null} [transcript]
+ * @property {string} [transcript]
+ */
+
+/**
+ * Extended content type that includes both text and transcript for audio
+ * @typedef {Object} ExtendedContentType
+ * @property {"text"|"audio"} type
+ * @property {string} [audio] base64-encoded audio data
+ * @property {string} [transcript] transcript of the audio
+ * @property {string} [text] text content
  */
 
 /**
@@ -91,7 +100,7 @@ import { RealtimeUtils } from './utils.js';
  * @property {"message"} type
  * @property {ItemStatusType} status
  * @property {"user"} role
- * @property {Array<InputTextContentType|InputAudioContentType>} content
+ * @property {Array<InputTextContentType|InputAudioContentType|ExtendedContentType>} content
  */
 
 /**
@@ -100,7 +109,7 @@ import { RealtimeUtils } from './utils.js';
  * @property {"message"} type
  * @property {ItemStatusType} status
  * @property {"assistant"} role
- * @property {Array<TextContentType|AudioContentType>} content
+ * @property {Array<TextContentType|AudioContentType|ExtendedContentType>} content
  */
 
 /**
@@ -145,6 +154,7 @@ import { RealtimeUtils } from './utils.js';
  * @property {string} object
  * @property {"user"|"assistant"|"system"} [role]
  * @property {FormattedPropertyType} formatted
+ * @property {Array<ExtendedContentType>} [content]
  */
 
 /**

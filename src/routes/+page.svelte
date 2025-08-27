@@ -123,6 +123,13 @@
   });
 
   /**
+   * 获取消息的文本内容
+   */
+  function getTextContent(item: ItemType): string | null {
+    return item.formatted?.transcript || item.formatted?.text || item.content?.[0]?.transcript || item.content?.[0]?.text || null;
+  }
+
+  /**
    * 用于格式化日志时间
    */
   function formatTime(timestamp: string) {
@@ -229,7 +236,7 @@
     // 收到新的对话消息时，播放 AI 说话的音频
     client?.on('conversation.updated', async (data: any) => {
       const { item, delta } = data;
-      client?.conversation.cleanupItems(30); // 为了避免占用太多内存，只保留最近的 30 条消息
+      client?.conversation.cleanupItems(50); // 为了避免占用太多内存，只保留最近的 50 条消息
       items = client?.conversation.getItems() || [];
       if (delta?.audio) {
         wavStreamPlayer.add16BitPCM(delta.audio, item.id);
@@ -667,44 +674,42 @@
         <!-- 对话历史 -->
         <div class="flex-1 space-y-4 overflow-y-auto p-2" use:autoScroll>
           {#each items as item}
-            {#if item.formatted?.transcript}
-              <div class="rounded-box flex flex-col p-2 {item.role === 'user' ? 'dark:bg-base-200 ml-auto bg-blue-100' : 'bg-base-200 mr-auto'} min-h-18 max-w-[80%]">
-                <div class="mb-1 font-semibold {item.role === 'user' ? 'text-blue-700 dark:text-blue-400' : 'text-rose-400'}">
-                  <div class="flex items-center gap-2">
-                    <span>{item.role === 'user' ? 'You' : 'AI'}</span>
-                    {#if item.formatted?.file}
-                      <div class="bg-base-300/80 flex h-6 w-48 items-center gap-2 overflow-hidden rounded-lg px-2 transition-all duration-200 hover:shadow group">
-                        <button
-                          class="transition-colors duration-200 hover:scale-110 hover:cursor-pointer"
-                          onclick={() => togglePlay(item.id)}
-                          title={audioPlayers[item.id]?.isPlaying ? '暂停' : '播放'}
-                          disabled={audioPlayers[item.id]?.isLoading || audioPlayers[item.id]?.hasError}
-                        >
-                          {#if audioPlayers[item.id]?.isLoading}
-                            <div class="loading loading-spinner loading-xs"></div>
-                          {:else if audioPlayers[item.id]?.isPlaying}
-                            <Pause size={14} />
-                          {:else}
-                            <Play size={14} />
-                          {/if}
-                        </button>
-                        <div id="waveform-{item.id}" class="flex-1 overflow-hidden rounded-lg {audioPlayers[item.id]?.hasError ? 'opacity-50' : ''}" use:initWaveSurfer={{ id: item.id, url: item.formatted.file.url }}></div>
-                        <button
-                          class="transition-colors duration-200 hover:scale-110 hover:cursor-pointer opacity-0 group-hover:opacity-100"
-                          onclick={() => downloadAudio(item.formatted.file.url, `audio-${item.id}.wav`)}
-                          title="下载音频"
-                        >
-                          <Download size={14} />
-                        </button>
-                      </div>
-                    {/if}
-                  </div>
-                </div>
-                <div>
-                  <p>{item.formatted.transcript}</p>
+            <div class="rounded-box flex flex-col p-2 {item.role === 'user' ? 'dark:bg-base-200 ml-auto bg-blue-100' : 'bg-base-200 mr-auto'} min-h-18 max-w-[80%]">
+              <div class="mb-1 font-semibold {item.role === 'user' ? 'text-blue-700 dark:text-blue-400' : 'text-rose-400'}">
+                <div class="flex items-center gap-2">
+                  <span>{item.role === 'user' ? 'You' : 'AI'}</span>
+                  {#if item.formatted?.file}
+                    <div class="bg-base-300/80 group flex h-6 w-48 items-center gap-2 overflow-hidden rounded-lg px-2 transition-all duration-200 hover:shadow">
+                      <button
+                        class="transition-colors duration-200 hover:scale-110 hover:cursor-pointer"
+                        onclick={() => togglePlay(item.id)}
+                        title={audioPlayers[item.id]?.isPlaying ? '暂停' : '播放'}
+                        disabled={audioPlayers[item.id]?.isLoading || audioPlayers[item.id]?.hasError}
+                      >
+                        {#if audioPlayers[item.id]?.isLoading}
+                          <div class="loading loading-spinner loading-xs"></div>
+                        {:else if audioPlayers[item.id]?.isPlaying}
+                          <Pause size={14} />
+                        {:else}
+                          <Play size={14} />
+                        {/if}
+                      </button>
+                      <div id="waveform-{item.id}" class="flex-1 overflow-hidden rounded-lg {audioPlayers[item.id]?.hasError ? 'opacity-50' : ''}" use:initWaveSurfer={{ id: item.id, url: item.formatted.file.url }}></div>
+                      <button class="opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:scale-110 hover:cursor-pointer" onclick={() => downloadAudio(item.formatted.file.url, `audio-${item.id}.wav`)} title="下载音频">
+                        <Download size={14} />
+                      </button>
+                    </div>
+                  {/if}
                 </div>
               </div>
-            {/if}
+              <div>
+                {#if getTextContent(item)}
+                  <p>{getTextContent(item)}</p>
+                {:else}
+                  <div class="skeleton h-4 w-32"></div>
+                {/if}
+              </div>
+            </div>
           {/each}
         </div>
 
