@@ -1,8 +1,17 @@
 import { building } from '$app/environment';
 import { env, type Server } from 'bun';
 
+// 定义 WebSocket 数据类型
+interface WebSocketData {
+  requestUrl?: string;
+  finalServerWs?: WebSocket;
+  messageQueue?: Array<string | Buffer>;
+  connectionFailed?: boolean;
+  connectionTimeout?: NodeJS.Timeout;
+}
+
 // 全局变量，用于跟踪服务器实例
-let bunServer: Server | null = null;
+let bunServer: Server<WebSocketData> | null = null;
 
 // Don't run the WebSocket server during build
 if (!building) {
@@ -19,7 +28,7 @@ async function startWebSocketServer() {
 
   try {
     const defaultWsUrl = 'wss://api.stepfun.com/v1/realtime';
-    const defaultModel = 'step-1o-audio';
+    const defaultModel = 'step-audio-2';
     const defaultApiKey = env.API_KEY || '';
 
     // 创建 Bun WebSocket 服务器
@@ -29,7 +38,7 @@ async function startWebSocketServer() {
         // 处理 WebSocket 升级请求
         const success = server.upgrade(req, {
           // 将请求 URL 传递给 WebSocket 数据
-          data: { requestUrl: req.url }
+          data: { requestUrl: req.url } as WebSocketData
         });
 
         if (success) {
@@ -52,6 +61,7 @@ async function startWebSocketServer() {
           let clientApiKey = null;
           let clientModel = null;
           let wsUrl = null;
+          let apiKeyType = null;
 
           try {
             if (requestUrl) {
@@ -59,6 +69,7 @@ async function startWebSocketServer() {
               clientApiKey = url.searchParams.get('apiKey');
               clientModel = url.searchParams.get('model');
               wsUrl = url.searchParams.get('wsUrl');
+              apiKeyType = url.searchParams.get('apiKeyType');
             }
           } catch (e) {
             console.error('Error parsing URL:', e);
@@ -76,11 +87,10 @@ async function startWebSocketServer() {
             }
           }
 
-          // 使用客户端提供的参数，如果没有则使用默认的
           const apiKey = clientApiKey || defaultApiKey;
+
           const model = clientModel || defaultModel;
 
-          console.log(`Using ${clientApiKey ? 'client-provided' : 'default'} API key`);
           console.log(`Using model: ${model}`);
 
           // 构建最终的服务器 URL
@@ -128,7 +138,7 @@ async function startWebSocketServer() {
                 let errorMessage = {
                   type: 'error',
                   error: 'connection_timeout',
-                  message: '连接服务器超时，请检查网络或 API Key'
+                  message: 'Connection timeout, please check network or API Key'
                 };
 
                 ws.send(JSON.stringify(errorMessage));
@@ -187,7 +197,7 @@ async function startWebSocketServer() {
                 let errorMessage = {
                   type: 'error',
                   error: 'connection_closed',
-                  message: '无法连接到服务器，请检查服务器地址或 API Key'
+                  message: 'Unable to connect to server, please check server address or API Key'
                 };
 
                 // 只有在 WebSocket 仍然开启状态时才发送
@@ -215,25 +225,28 @@ async function startWebSocketServer() {
               // 构建错误消息
               let errorMessage = {
                 type: 'error',
-                error: '',
+                error: { code: 0, message: '' },
                 message: ''
               };
 
-              // 检查是否为 401 错误（无效的 API Key）
+              // 检查是否为特定错误（401、429等）
               try {
                 // 安全地访问 error.message
                 const errorMsg = (error as any).message || '';
                 if (errorMsg.includes('401')) {
-                  errorMessage.error = 'invalid_api_key';
-                  errorMessage.message = '无效的 API Key，请检查后重试';
+                  errorMessage.error = { code: 401, message: 'Invalid API Key' };
+                  errorMessage.message = 'Invalid API Key, please check and try again';
+                } else if (errorMsg.includes('429')) {
+                  errorMessage.error = { code: 429, message: 'Rate limit exceeded' };
+                  errorMessage.message = 'The connection through your private key has rejected due to the frequency or concurrency limits. You can try again later';
                 } else {
-                  errorMessage.error = 'connection_error';
-                  errorMessage.message = '连接到服务器时发生错误';
+                  errorMessage.error = { code: 0, message: 'Connection error' };
+                  errorMessage.message = 'Error occurred while connecting to server';
                 }
               } catch (e) {
                 // 如果无法访问 error.message，使用默认错误消息
-                errorMessage.error = 'connection_error';
-                errorMessage.message = '连接到服务器时发生错误';
+                errorMessage.error = { code: 0, message: 'Connection error' };
+                errorMessage.message = 'Error occurred while connecting to server';
               }
 
               ws.send(JSON.stringify(errorMessage));

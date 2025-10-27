@@ -31,6 +31,7 @@ export class RealtimeConversation {
       newItem.formatted.audio = new Int16Array(0);
       newItem.formatted.text = '';
       newItem.formatted.transcript = '';
+      newItem.formatted.think = '';
       // If we have a speech item, can populate audio
       if (this.queuedSpeechItems[newItem.id]) {
         newItem.formatted.audio = this.queuedSpeechItems[newItem.id].audio;
@@ -252,6 +253,27 @@ export class RealtimeConversation {
       item.arguments += delta;
       item.formatted.tool.arguments += delta;
       return { item, delta: { arguments: delta } };
+    },
+        'response.thinking.delta': (event) => {
+      const { item_id,content_index, delta } = event;
+      const item = this.itemLookup[item_id];
+      if (!item) {
+        throw new Error(`response.thinking.delta: Item "${item_id}" not found`);
+      }
+
+      item.content[content_index].think += delta;
+      item.formatted.think += delta||'';
+      item.status = 'thinking';
+      return { item, delta: { think: delta } };
+    },
+    'response.thinking.done': (event) => {
+      const { item_id } = event;
+      const item = this.itemLookup[item_id];
+      if (!item) {
+        throw new Error(`response.thinking.done: Item "${item_id}" not found`);
+      }
+      item.status = 'think_completed';
+      return { item, delta: null };
     },
   };
 

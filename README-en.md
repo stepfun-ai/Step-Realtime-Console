@@ -88,7 +88,9 @@ After successfully running the project, you need to click the **Server Settings*
 
 1.  **Server Address**: wss://api.stepfun.com/v1/realtime
 
-2.  **API Key**: You need to obtain the API key through the Stepfun Open Platform. Please visit [Stepfun Open Platform](https://platform.stepfun.com/) to register and get your API Key.
+2.  **Model Name**: Currently supports four versions of models: step-audio-2, step-audio-2-mini, step-audio-2-think, step-audio-2-mini-think
+
+3.  **API Key**: You need to obtain the API key through the Stepfun Open Platform. Please visit [Stepfun Open Platform](https://platform.stepfun.com/) to register and get your API Key.
 
 After filling in, you can start experiencing the realtime voice interaction function.
 
@@ -143,15 +145,12 @@ This project uses the Stepfun Realtime Voice API, and the main functions include
 1.  **Establish WebSocket Connection**: Connect to the Stepfun Realtime API server
 2.  **Voice Input**: Supports realtime voice input, automatically transcribed into text
 3.  **AI Response**: Get AI's realtime text and voice responses
-4.  **Custom Parameters**: Adjustable model, temperature, voice, and other parameters
 
 ### Main API Parameters
 
-- **Model**: Select different AI models
-- **Voice**: Select different AI voices
-- **Temperature**: Adjust the randomness of AI replies (0.0-1.0)
-- **Audio Format**: Select input/output audio format
-- **Persona Instructions**: Customize AI behavior and reply style
+- **Model Name**: Select different AI models
+- **Voice Tone**: Select different AI voices
+- **System Prompt**: Customize AI behavior and overall instructions
 
 ## Precautions
 

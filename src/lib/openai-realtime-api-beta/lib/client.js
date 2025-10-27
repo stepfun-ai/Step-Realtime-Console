@@ -60,8 +60,9 @@ import { RealtimeUtils } from './utils.js';
  * @typedef {Object} InputAudioContentType
  * @property {"input_audio"} type
  * @property {string} [audio] base64-encoded audio data
- * @property {string|null} [transcript]
+ * @property {string} [transcript]
  */
+
 
 /**
  * @typedef {Object} TextContentType
@@ -83,6 +84,7 @@ import { RealtimeUtils } from './utils.js';
  * @property {string} [audio] base64-encoded audio data
  * @property {string} [transcript] transcript of the audio
  * @property {string} [text] text content
+ * @property {string} [think] think content
  */
 
 /**
@@ -143,6 +145,7 @@ import { RealtimeUtils } from './utils.js';
  * @property {Int16Array} [audio]
  * @property {string} [text]
  * @property {string} [transcript]
+ * @property {string} [think]
  * @property {FormattedToolType} [tool]
  * @property {string} [output]
  * @property {any} [file]
@@ -199,14 +202,21 @@ import { RealtimeUtils } from './utils.js';
 export class RealtimeClient extends RealtimeEventHandler {
   /**
    * Create a new RealtimeClient instance
-   * @param {{url?: string, apiKey?: string, dangerouslyAllowAPIKeyInBrowser?: boolean, debug?: boolean}} [settings]
+   * @param {{url?: string, apiKey?: string, dangerouslyAllowAPIKeyInBrowser?: boolean, debug?: boolean, instructions?: string, voice?: string}} [settings]
    */
-  constructor({ url, apiKey, dangerouslyAllowAPIKeyInBrowser, debug } = {}) {
+  constructor({
+    url,
+    apiKey,
+    dangerouslyAllowAPIKeyInBrowser,
+    debug,
+    instructions,
+    voice,
+  } = {}) {
     super();
     this.defaultSessionConfig = {
       modalities: ['text', 'audio'],
-      instructions: '',
-      voice: 'jingdiannvsheng',
+      instructions: instructions || '',
+      voice: voice || '',
       input_audio_format: 'pcm16',
       output_audio_format: 'pcm16',
       input_audio_transcription: null,
@@ -361,6 +371,8 @@ export class RealtimeClient extends RealtimeEventHandler {
       'server.response.function_call_arguments.delta',
       handlerWithDispatch,
     );
+    this.realtime.on('server.response.thinking.delta', handlerWithDispatch);
+    this.realtime.on('server.response.thinking.done', handlerWithDispatch);
     this.realtime.on('server.response.output_item.done', async (event) => {
       const { item } = handlerWithDispatch(event);
       if (item.status === 'completed') {
