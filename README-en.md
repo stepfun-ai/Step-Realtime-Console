@@ -92,6 +92,8 @@ After successfully running the project, you need to click the **Server Settings*
 
 3.  **API Key**: You need to obtain the API key through the Stepfun Open Platform. Please visit [Stepfun Open Platform](https://platform.stepfun.com/) to register and get your API Key.
 
+4.  **Voice**: Voice tone setting (required). Please fill in the voice value you want to use, for example: qingchunshaonv, wenrounansheng, etc.
+
 After filling in, you can start experiencing the realtime voice interaction function.
 
 ## Project Structure
@@ -149,7 +151,7 @@ This project uses the Stepfun Realtime Voice API, and the main functions include
 ### Main API Parameters
 
 - **Model Name**: Select different AI models
-- **Voice Tone**: Select different AI voices
+- **Voice**: Set AI voice tone (required)
 - **System Prompt**: Customize AI behavior and overall instructions
 
 ## Precautions

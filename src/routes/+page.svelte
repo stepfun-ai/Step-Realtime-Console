@@ -25,6 +25,7 @@
   let modelName = $state(availableModels[0]); // Selected model
   let apiKey = $state(''); // API_KEY
   let apiKeyType = $state('private');
+  let voice = $state(''); // Voice tone (user input)
 
   let items: Array<ItemType> = $state([]); // Conversation items
   let realtimeEvents: Array<RealtimeEvent> = $state([]); // All event logs
@@ -59,6 +60,7 @@
       const savedApiKey = localStorage.getItem('apiKey');
       const savedApiKeyType = localStorage.getItem('apiKeyType');
       const savedVoice = localStorage.getItem('selectedVoice');
+      const savedVoiceInput = localStorage.getItem('voice');
 
       if (savedWsUrl) wsUrl = savedWsUrl;
       if (savedModelName) modelName = savedModelName;
@@ -68,6 +70,7 @@
         const voice = voices.find(v => v.value === savedVoice);
         if (voice) selectedVoice = voice;
       }
+      if (savedVoiceInput) voice = savedVoiceInput;
     }
   });
 
@@ -84,6 +87,7 @@
       localStorage.setItem('apiKey', apiKey);
       localStorage.setItem('apiKeyType', apiKeyType);
       localStorage.setItem('selectedVoice', selectedVoice.value);
+      localStorage.setItem('voice', voice);
     }
   });
 
@@ -103,6 +107,14 @@
       }
     }
   });
+
+  // 当模型切换时，如果 instructions 是默认值，自动更新为对应模型的默认值
+  $effect(() => {
+    if (isDefaultInstruction(instructions)) {
+      instructions = getInstruction(modelName);
+    }
+  });
+
 
   /**
    * 获取消息的文本内容
@@ -250,12 +262,14 @@
       wsProxyUrl += `?${queryString}`;
     }
 
-    // Combine hidden system prompt with user instructions
-    const combinedInstructions = `${getInstruction(modelName)}`;
+    // Use user instructions if modified, otherwise use default instruction based on model
+    const combinedInstructions = isDefaultInstruction(instructions) ? getInstruction(modelName) : instructions;
+    // Use user input voice (required)
+    const voiceValue = voice.trim();
     client = new RealtimeClient({
       url: wsProxyUrl,
       instructions: combinedInstructions,
-      voice: selectedVoice.value
+      voice: voiceValue
     });
 
     // 清除之前的错误信息
@@ -392,6 +406,11 @@
     // 如果选择了私钥但没有填写，alert
     if (apiKeyType === 'private' && !apiKey) {
       alert('Please fill in API Key before connecting');
+      return;
+    }
+    // 如果 voice 没有填写，alert
+    if (!voice || !voice.trim()) {
+      alert('Please fill in Voice before connecting');
       return;
     }
     try {
@@ -553,14 +572,15 @@
   // Update system prompt
   async function changeInstructions() {
     await tick(); // Wait for tick to ensure instructions are updated
-    const combinedInstructions = `${getInstruction(modelName)}`;
+    // Use user instructions if modified, otherwise use default instruction based on model
+    const combinedInstructions = isDefaultInstruction(instructions) ? getInstruction(modelName) : instructions;
     client?.updateSession({ instructions: combinedInstructions });
   }
 
-  // Update voice when selection changes
+  // Update voice when voice input changes
   async function updateVoice() {
-    if (client?.isConnected()) {
-      client?.updateSession({ voice: selectedVoice.value });
+    if (client?.isConnected() && voice.trim()) {
+      client?.updateSession({ voice: voice.trim() });
     }
   }
 
@@ -698,16 +718,6 @@
       {#if connectionError}
         <div class="text-error bg-error/10 mb-2 w-full rounded p-2 text-xs break-words sm:mb-0 sm:ml-2 sm:w-auto sm:rounded-none sm:bg-transparent sm:p-0 sm:text-sm sm:text-nowrap">{connectionError}</div>
       {/if}
-
-      <!-- Always visible settings -->
-      <label class="select rounded-box mb-2 w-full sm:mr-2 sm:mb-0 sm:w-72 md:w-72">
-        <span class="label text-sm">Voice Tone</span>
-        <select bind:value={selectedVoice} onchange={updateVoice}>
-          {#each availableVoices as voice}
-            <option value={voice}>{voice.name}</option>
-          {/each}
-        </select>
-      </label>
 
       <!-- VAD mode toggle - only show when connected -->
       {#if isConnected}
@@ -1024,6 +1034,11 @@
           <input type="password" placeholder="Private Key" bind:value={apiKey} disabled={isConnected} class="text-sm" />
         </label>
       {/if}
+
+      <label class="input rounded-box w-full">
+        <span class="label w-24 text-xs sm:w-32 sm:text-sm">Voice</span>
+        <input type="text" placeholder="Voice" bind:value={voice} disabled={isConnected} onblur={updateVoice} class="text-sm" />
+      </label>
     </div>
 
     <div class="modal-action mt-6">

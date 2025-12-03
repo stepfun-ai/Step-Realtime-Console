@@ -92,6 +92,8 @@ bun run build
 
 3. **API Key**：您需要通过阶跃星辰开放平台获取 API 密钥。请访问 [阶跃星辰开放平台](https://platform.stepfun.com/) 注册并获取您的 API Key。
 
+4. **Voice**：音色设置（必填）。请填写您想要使用的音色值，例如：qingchunshaonv、wenrounansheng 等。
+
 填写完成后，您就可以开始体验实时语音交互功能了。
 
 ## 项目结构
@@ -149,7 +151,7 @@ realtime-console-demo/
 ### 主要 API 参数
 
 - **Model Name**：选择不同的 AI 模型
-- **Voice Tone**：选择不同的 AI 语音
+- **Voice**：设置 AI 的语音音色（必填）
 - **System Prompt**：自定义 AI 的行为和全局指令
 
 ## 注意事项
