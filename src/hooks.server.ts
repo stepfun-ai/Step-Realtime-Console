@@ -28,7 +28,7 @@ async function startWebSocketServer() {
 
   try {
     const defaultWsUrl = 'wss://api.stepfun.com/v1/realtime';
-    const defaultModel = 'step-audio-2';
+    const defaultModel = 'stepaudio-2.5-realtime';
     const defaultApiKey = env.API_KEY || '';
 
     // 创建 Bun WebSocket 服务器
