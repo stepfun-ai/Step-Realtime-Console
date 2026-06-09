@@ -41,7 +41,7 @@ const thinkDefaultInstruction = `{{.Date}}
 `
 
 export const audioFormats = ['pcm16', 'g711_ulaw', 'g711_alaw'];
-export const availableModels = ['step-1o-audio', 'step-audio-2', 'step-audio-2-mini', 'step-audio-2-think', 'step-audio-2-mini-think']; // 可用的模型列表
+export const availableModels = ['stepaudio-2.5-realtime', 'step-1o-audio', 'step-audio-2', 'step-audio-2-mini']; // 可用的模型列表
 
 
 export const getInstruction = (modelName: string) => {
