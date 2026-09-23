@@ -21,11 +21,11 @@
   const wavStreamPlayer = new WavStreamPlayer({ sampleRate: sampleRate }); // 语音输出
   let client: RealtimeClient | null = null; // 实时语音 API 客户端
 
-  let wsUrl = $state('wss://api.stepfun.com/v1/realtime'); // WebSocket URL state variable
+  let wsUrl = $state('wss://api.stepfun.ai/v1/realtime'); // WebSocket URL state variable
   let modelName = $state(availableModels[0]); // Selected model
   let apiKey = $state(''); // API_KEY
   let apiKeyType = $state('private');
-  let voice = $state(''); // Voice tone (user input)
+  let voice = $state('soft-spoken-gentleman'); // Voice tone (user input)
 
   let items: Array<ItemType> = $state([]); // Conversation items
   let realtimeEvents: Array<RealtimeEvent> = $state([]); // All event logs
@@ -274,7 +274,8 @@
     client = new RealtimeClient({
       url: wsProxyUrl,
       instructions: combinedInstructions,
-      voice: voiceValue
+      voice: voiceValue,
+      model: modelName
     });
 
     // 清除之前的错误信息

@@ -202,7 +202,7 @@ import { RealtimeUtils } from './utils.js';
 export class RealtimeClient extends RealtimeEventHandler {
   /**
    * Create a new RealtimeClient instance
-   * @param {{url?: string, apiKey?: string, dangerouslyAllowAPIKeyInBrowser?: boolean, debug?: boolean, instructions?: string, voice?: string}} [settings]
+   * @param {{url?: string, apiKey?: string, dangerouslyAllowAPIKeyInBrowser?: boolean, debug?: boolean, instructions?: string, voice?: string, model?: string}} [settings]
    */
   constructor({
     url,
@@ -211,6 +211,7 @@ export class RealtimeClient extends RealtimeEventHandler {
     debug,
     instructions,
     voice,
+    model,
   } = {}) {
     super();
     this.defaultSessionConfig = {
@@ -226,6 +227,13 @@ export class RealtimeClient extends RealtimeEventHandler {
       temperature: 0.8,
       max_response_output_tokens: 4096,
     };
+    if (model === 'stepaudio-3-realtime-preview') {
+      // StepAudio 3 accepts the documented realtime session fields only.
+      delete this.defaultSessionConfig.input_audio_transcription;
+      delete this.defaultSessionConfig.tool_choice;
+      delete this.defaultSessionConfig.temperature;
+      delete this.defaultSessionConfig.max_response_output_tokens;
+    }
     this.sessionConfig = {};
     this.transcriptionModels = [
       {
