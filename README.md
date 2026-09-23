@@ -86,13 +86,13 @@ bun run build
 
 成功运行项目后，您需要在界面中点击**服务器设置**按钮并配置以下信息：
 
-1. **服务器地址**：wss://api.stepfun.com/v1/realtime
+1. **服务器地址**：海外平台的 API Key 使用 `wss://api.stepfun.ai/v1/realtime`。中国大陆平台的 API Key 请使用 `wss://api.stepfun.com/v1/realtime`。已有的设置会保留。
 
-2. **模型名称**：当前支持step-audio-2、step-audio-2-mini、step-audio-2-think、step-audio-2-mini-think 共四个版本模型
+2. **模型名称**：选择 `stepaudio-3-realtime-preview` 使用 StepAudio 3。旧版模型选项仍然保留。
 
 3. **API Key**：您需要通过阶跃星辰开放平台获取 API 密钥。请访问 [阶跃星辰开放平台](https://platform.stepfun.com/) 注册并获取您的 API Key。
 
-4. **Voice**：音色设置（必填）。请填写您想要使用的音色值，例如：qingchunshaonv、wenrounansheng 等。
+4. **Voice**：音色 ID 为必填项。StepAudio 3 默认使用 `soft-spoken-gentleman`，也可以选择[支持的系统音色](https://platform.stepfun.ai/docs/en/api-reference/realtime/chat#voices)或有效的克隆音色 ID。旧版模型可能需要不同的音色 ID；切换模型时请检查已保存的音色。模型开始生成音频后不能更改音色。
 
 填写完成后，您就可以开始体验实时语音交互功能了。
 

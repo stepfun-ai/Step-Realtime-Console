@@ -86,13 +86,13 @@ The first page load during development may be slower because the project uses th
 
 After successfully running the project, you need to click the **Server Settings** button in the interface and configure the following information:
 
-1.  **Server Address**: wss://api.stepfun.com/v1/realtime
+1.  **Server Address**: `wss://api.stepfun.ai/v1/realtime` for an overseas API key. If your key was issued by the Mainland China platform, use `wss://api.stepfun.com/v1/realtime` instead. Existing saved settings are preserved.
 
-2.  **Model Name**: Currently supports four versions of models: step-audio-2, step-audio-2-mini, step-audio-2-think, step-audio-2-mini-think
+2.  **Model Name**: Select `stepaudio-3-realtime-preview` for StepAudio 3. The earlier model choices remain available.
 
 3.  **API Key**: You need to obtain the API key through the Stepfun Open Platform. Please visit [Stepfun Open Platform](https://platform.stepfun.com/) to register and get your API Key.
 
-4.  **Voice**: Voice tone setting (required). Please fill in the voice value you want to use, for example: qingchunshaonv, wenrounansheng, etc.
+4.  **Voice**: A voice ID is required. For StepAudio 3, the default `soft-spoken-gentleman` works, as do other [supported system voices](https://platform.stepfun.ai/docs/en/api-reference/realtime/chat#voices) or a valid cloned voice ID. Older models may use different voice IDs; update a previously saved voice when switching models. Set the voice before the model produces audio.
 
 After filling in, you can start experiencing the realtime voice interaction function.
 
